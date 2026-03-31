@@ -113,6 +113,7 @@ class Command(BaseCommand):
                     employer = company,
                     title    = title,
                     snippet  = strip_html(card_html)[:400],
+                    employer_url = tracker or "",
                 )
                 new_count += 1
 

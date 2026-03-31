@@ -14,6 +14,7 @@ class Job(models.Model):
     title      = models.CharField(max_length=255, blank=True)
     status     = models.CharField(max_length=20, choices=STATUS_CHOICES, default='potential')
     snippet    = models.TextField(blank=True)
+    employer_url = models.URLField(blank=True)
     scraped_at = models.DateTimeField(auto_now_add=True)
 
 class RankedJob(models.Model):
