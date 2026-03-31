@@ -64,6 +64,12 @@ class Command(BaseCommand):
         self.stdout.write(f"Query: '{query}'")
         self.stdout.write(f"Blacklist: {blacklist}")
 
+        # Compile blacklist into single regex pattern
+        blacklist_pattern = re.compile(
+            '|'.join(re.escape(word) for word in blacklist),
+            re.IGNORECASE
+        )
+
         new_count      = 0
         filtered_count = 0
         visited_count  = 0
@@ -95,7 +101,7 @@ class Command(BaseCommand):
                 visited = Visited.objects.create(url=url)
 
                 # Apply blacklist filter
-                if any(word.lower() in title.lower() for word in blacklist):
+                if blacklist_pattern.search(title):
                     filtered_count += 1
                     continue
 

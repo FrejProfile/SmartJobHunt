@@ -4,3 +4,16 @@
 - postdoc
 - forsvaret
 - defence
+- lead
+- business
+- afdelingsleder
+- praktik
+- teamleder
+- kundeservice
+- sælger
+- butiksmedarbejder
+- servicemedarbejder
+- sagsbehandler
+- salgsledere
+- kulturhusbestyrer
+- salgsassistent
