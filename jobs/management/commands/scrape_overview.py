@@ -51,6 +51,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('--search-words', default='scripts/search_words.md')
         parser.add_argument('--filters', default='scripts/filters.md')
+        parser.add_argument('--verbose', action='store_true', help='Print filtered out jobs to CLI')
 
     def handle(self, *args, **options):
         search_words = parse_markdown_list(options['search_words'])
@@ -102,6 +103,8 @@ class Command(BaseCommand):
                 # Apply blacklist filter
                 if blacklist_pattern.search(title):
                     filtered_count += 1
+                    if options['verbose']:
+                        self.stdout.write(f"  [FILTERED] {title} | {company}")
                     continue
 
                 # Create job for survivors
