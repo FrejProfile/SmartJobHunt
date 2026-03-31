@@ -1,0 +1,6 @@
+- senior
+- universitet
+- phd
+- postdoc
+- forsvaret
+- defence

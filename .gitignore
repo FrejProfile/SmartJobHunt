@@ -1,0 +1,15 @@
+
+# Excluded
+.venv
+/competences/*
+*.sqlite3
+/jobs/potential/*
+/jobs/applied/*
+__pycache__/
+*.pyc
+
+
+# Included
+!/competences/index.md
+
+
