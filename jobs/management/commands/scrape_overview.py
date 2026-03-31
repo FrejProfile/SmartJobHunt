@@ -8,11 +8,10 @@ def parse_markdown_list(filepath):
     with open(filepath) as f:
         lines = f.readlines()
     return [
-        line.strip().lstrip('-').strip()
+        line.strip().lstrip('-').split('#')[0].strip()
         for line in lines
         if line.strip().startswith('-')
     ]
-
 def extract_employer_tracker_url(html):
     match = re.search(r'class="btn btn-sm btn-primary seejobdesktop"[^>]*href="([^"]+)"', html)
     if match:
