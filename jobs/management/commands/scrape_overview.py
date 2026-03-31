@@ -4,6 +4,23 @@ import requests
 from django.core.management.base import BaseCommand
 from jobs.models import Job, Visited
 
+"""
+Desciption:
+-   Scrapes job index for jobs using search_words.md and applies the filters from filters.md
+    It stores the jobs it has previous 
+
+File Dependecy:
+
+
+
+Call script:
+-   All arguments are optional and will default to defualt if not supplied.
+    verbose flag can be used to print jobs caught by the filters to cli
+    python manage.py --search-words "PATH mardown" --filters "PATH mardown" --verbose
+
+"""
+
+
 def parse_markdown_list(filepath):
     with open(filepath) as f:
         lines = f.readlines()
@@ -98,7 +115,7 @@ class Command(BaseCommand):
                     visited_count += 1
                     continue
 
-                visited = Visited.objects.create(url=url)
+                
 
                 # Apply blacklist filter
                 if blacklist_pattern.search(title):
@@ -108,6 +125,8 @@ class Command(BaseCommand):
                     continue
 
                 # Create job for survivors
+                visited = Visited.objects.create(url=url)
+
                 Job.objects.create(
                     visited  = visited,
                     employer = company,
