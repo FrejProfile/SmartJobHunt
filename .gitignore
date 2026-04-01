@@ -8,6 +8,7 @@
 __pycache__/
 *.pyc
 temp/*
+jobs_data
 
 # Included
 !/competences/index.md
