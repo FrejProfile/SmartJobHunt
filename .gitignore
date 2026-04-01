@@ -7,7 +7,7 @@
 /jobs/applied/*
 __pycache__/
 *.pyc
-temp
+temp/*
 
 # Included
 !/competences/index.md
