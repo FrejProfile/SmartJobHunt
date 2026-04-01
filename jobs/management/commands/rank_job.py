@@ -46,6 +46,10 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS(
                 f"Ranked job {job_id} with score {score}"
             ))
+
+            job.status = 'ranked'
+            job.save()
+
         except Job.DoesNotExist:
             self.stdout.write(self.style.ERROR(
                 f"Job {job_id} not found in database"

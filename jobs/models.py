@@ -8,6 +8,7 @@ class Job(models.Model):
     STATUS_CHOICES = [
         ('potential', 'Potential'),
         ('applied', 'Applied'),
+        ('ranked', 'Ranked'),
     ]
     visited    = models.OneToOneField(Visited, on_delete=models.CASCADE)
     employer   = models.CharField(max_length=255, blank=True)

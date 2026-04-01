@@ -16,7 +16,7 @@ class Command(BaseCommand):
 
         jobs = (
             RankedJob.objects
-            .filter(score__gte=threshold, job__status='potential')
+            .filter(score__gte=threshold, job__status='ranked')
             .select_related('job')
             .order_by('-score')
         )
