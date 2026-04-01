@@ -37,9 +37,12 @@ class Command(BaseCommand):
         # Pop the job from the list
         jobs = [j for j in jobs if j['id'] != job_id]
 
-        # Write back
-        with open(POTENTIAL_JOBS_FILE, 'w', encoding='utf-8') as f:
-            json.dump(jobs, f, indent=2, ensure_ascii=False)
+        if not jobs:
+            os.remove(POTENTIAL_JOBS_FILE)
+            self.stdout.write("potential_jobs.json empty, deleted.")
+        else:
+            with open(POTENTIAL_JOBS_FILE, 'w', encoding='utf-8') as f:
+                json.dump(jobs, f, indent=2, ensure_ascii=False)    
 
         # Handle decision
         try:
