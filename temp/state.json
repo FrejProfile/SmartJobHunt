@@ -1,0 +1,20 @@
+{
+  "state": "scraping",
+  "history": [
+    {
+      "event": "scrape_overview",
+      "timestamp": "2026-04-01T04:51:22",
+      "note": ""
+    },
+    {
+      "event": "get_potential_jobs",
+      "timestamp": "2026-04-01T04:56:20",
+      "note": ""
+    },
+    {
+      "event": "scrape_overview",
+      "timestamp": "2026-04-01T04:56:36",
+      "note": ""
+    }
+  ]
+}

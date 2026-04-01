@@ -4,6 +4,8 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$PROJECT_ROOT"
 source .venv/bin/activate
 
+source "$PROJECT_ROOT/tools/internal/guard.sh" "create_job_folders"
+
 python3 -c "
 import json, os
 
@@ -32,3 +34,5 @@ for job in jobs:
 os.remove(ranked_jobs_file)
 print('ranked_jobs.json deleted.')
 "
+
+source "$PROJECT_ROOT/tools/internal/update_state.sh" "create_job_folders"

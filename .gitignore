@@ -12,5 +12,6 @@ jobs_data
 
 # Included
 !/competences/index.md
+!/temp/state.json
 
 
