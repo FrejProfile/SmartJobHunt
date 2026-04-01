@@ -39,3 +39,14 @@ Usage: `./tools/create_job_folder/create_job_folder.sh <job_id>`
 Fetches full HTML for all jobs in `temp/potential_jobs.json` and writes to `temp/jobs_html.html`.
 Run after phase 1 ranking is complete.
 Usage: `./tools/fetch_job_html/fetch_job_html.sh`
+
+### rank_job
+Ranks a job with a score from 1-10 and writes to RankedJob table.
+Pops job from `temp/jobs_html.json`, deletes file if empty.
+Usage: `./tools/rank_job/rank_job.sh <job_id> <score>`
+
+### get_ranked_jobs
+Dumps all ranked jobs above a score threshold to `temp/ranked_jobs.json`.
+Ordered by score descending. Only includes jobs with status potential.
+Run after phase 2 scoring is complete.
+Usage: `./tools/get_ranked_jobs/get_ranked_jobs.sh <threshold>`
