@@ -1,7 +1,24 @@
 # Tools Index
 
+# Tools Index
+
 Always run `get_state` first to determine current pipeline state and next step.
 Never call anything under `tools/internal/` — these are infrastructure scripts.
+
+## Normal Flow
+Follow this exact sequence of tool calls to move the pipeline forward:
+
+1. `./tools/scrape_overview/scrape_overview.sh`
+2. `./tools/get_potential_jobs/get_potential_jobs.sh`
+3. Call `./tools/process_phase1/process_phase1.sh <job_id> <pass|fail>` for each job in `temp/potential_jobs.json`
+4. `./tools/fetch_job_html/fetch_job_html.sh`
+5. Call `./tools/rank_job/rank_job.sh <job_id> <score>` for each job in `temp/jobs_html.json`
+6. `./tools/get_ranked_jobs/get_ranked_jobs.sh <threshold>`
+7. `./tools/create_job_folders/create_job_folders.sh`
+8. For each folder in `jobs_data/potential/` read `job.json` and write `cover_letter.md`
+
+Steps 3 and 5 repeat until their respective temp files are empty and deleted.
+Always call `get_state` if unsure which step you are on.
 
 ## get_state
 Check current pipeline state, allowed tools and their transitions.

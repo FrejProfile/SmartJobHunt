@@ -18,7 +18,8 @@ FPGA across three courses. Production testing at Swienty A/S.
 ## Software Engineering
 C/C++, Python, Assembly, MATLAB/Simulink, PLC, CMake, GoogleTest, pytest,
 Linux/Bash, Git, Docker, Django, Siemens NX, STM32CubeIDE, LabVIEW. Isaac Sim and ROS2
-for synthetic data generation and sensor simulation.
+for synthetic data generation and sensor simulation. UML, design patterns and
+embedded software design across three courses.
 `competences/software_engineering/summary.md`
 
 ## Mechanical

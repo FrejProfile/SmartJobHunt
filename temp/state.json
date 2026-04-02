@@ -1,25 +1,245 @@
 {
-  "state": "scraping",
+  "state": "2",
   "history": [
     {
       "event": "scrape_overview",
-      "timestamp": "2026-04-01T04:51:22",
-      "note": ""
+      "timestamp": "2026-04-02T04:04:31"
     },
     {
       "event": "get_potential_jobs",
-      "timestamp": "2026-04-01T04:56:20",
-      "note": ""
+      "timestamp": "2026-04-02T04:09:23"
+    },
+    {
+      "event": "process_phase1",
+      "timestamp": "2026-04-02T04:10:27"
+    },
+    {
+      "event": "process_phase1",
+      "timestamp": "2026-04-02T04:10:31"
+    },
+    {
+      "event": "process_phase1",
+      "timestamp": "2026-04-02T04:10:35"
+    },
+    {
+      "event": "process_phase1",
+      "timestamp": "2026-04-02T04:10:39"
+    },
+    {
+      "event": "process_phase1",
+      "timestamp": "2026-04-02T04:10:42"
+    },
+    {
+      "event": "process_phase1",
+      "timestamp": "2026-04-02T04:10:45"
+    },
+    {
+      "event": "process_phase1",
+      "timestamp": "2026-04-02T04:10:51"
+    },
+    {
+      "event": "process_phase1",
+      "timestamp": "2026-04-02T04:11:15"
+    },
+    {
+      "event": "process_phase1",
+      "timestamp": "2026-04-02T04:11:19"
+    },
+    {
+      "event": "process_phase1",
+      "timestamp": "2026-04-02T04:11:21"
+    },
+    {
+      "event": "process_phase1",
+      "timestamp": "2026-04-02T04:11:24"
+    },
+    {
+      "event": "process_phase1",
+      "timestamp": "2026-04-02T04:11:28"
+    },
+    {
+      "event": "get_potential_jobs",
+      "timestamp": "2026-04-02T04:12:40"
+    },
+    {
+      "event": "fetch_job_html",
+      "timestamp": "2026-04-02T04:13:11"
+    },
+    {
+      "event": "rank_job",
+      "timestamp": "2026-04-02T04:14:58"
+    },
+    {
+      "event": "rank_job",
+      "timestamp": "2026-04-02T04:15:02"
+    },
+    {
+      "event": "rank_job",
+      "timestamp": "2026-04-02T04:15:04"
+    },
+    {
+      "event": "rank_job",
+      "timestamp": "2026-04-02T04:15:07"
+    },
+    {
+      "event": "rank_job",
+      "timestamp": "2026-04-02T04:15:10"
+    },
+    {
+      "event": "rank_job",
+      "timestamp": "2026-04-02T04:15:13"
+    },
+    {
+      "event": "rank_job",
+      "timestamp": "2026-04-02T04:15:16"
+    },
+    {
+      "event": "rank_job",
+      "timestamp": "2026-04-02T04:15:19"
+    },
+    {
+      "event": "rank_job",
+      "timestamp": "2026-04-02T04:15:23"
+    },
+    {
+      "event": "rank_job",
+      "timestamp": "2026-04-02T04:15:32"
+    },
+    {
+      "event": "rank_job",
+      "timestamp": "2026-04-02T04:15:35"
+    },
+    {
+      "event": "rank_job",
+      "timestamp": "2026-04-02T04:15:38"
+    },
+    {
+      "event": "rank_job",
+      "timestamp": "2026-04-02T04:15:41"
+    },
+    {
+      "event": "get_ranked_jobs",
+      "timestamp": "2026-04-02T04:17:08"
+    },
+    {
+      "event": "create_job_folders",
+      "timestamp": "2026-04-02T04:17:34"
     },
     {
       "event": "scrape_overview",
-      "timestamp": "2026-04-01T04:56:36",
-      "note": ""
+      "timestamp": "2026-04-02T04:21:26"
     },
     {
-      "event": "scrape_overview",
-      "timestamp": "2026-04-01T07:52:50",
-      "note": ""
+      "event": "get_potential_jobs",
+      "timestamp": "2026-04-02T04:22:12"
+    },
+    {
+      "event": "process_phase1",
+      "timestamp": "2026-04-02T04:27:24"
+    },
+    {
+      "event": "process_phase1",
+      "timestamp": "2026-04-02T04:27:24"
+    },
+    {
+      "event": "process_phase1",
+      "timestamp": "2026-04-02T04:27:25"
+    },
+    {
+      "event": "process_phase1",
+      "timestamp": "2026-04-02T04:27:26"
+    },
+    {
+      "event": "process_phase1",
+      "timestamp": "2026-04-02T04:27:26"
+    },
+    {
+      "event": "process_phase1",
+      "timestamp": "2026-04-02T04:27:27"
+    },
+    {
+      "event": "process_phase1",
+      "timestamp": "2026-04-02T04:27:28"
+    },
+    {
+      "event": "process_phase1",
+      "timestamp": "2026-04-02T04:27:28"
+    },
+    {
+      "event": "process_phase1",
+      "timestamp": "2026-04-02T04:27:29"
+    },
+    {
+      "event": "process_phase1",
+      "timestamp": "2026-04-02T04:27:30"
+    },
+    {
+      "event": "process_phase1",
+      "timestamp": "2026-04-02T04:27:30"
+    },
+    {
+      "event": "process_phase1",
+      "timestamp": "2026-04-02T04:27:31"
+    },
+    {
+      "event": "process_phase1",
+      "timestamp": "2026-04-02T04:27:32"
+    },
+    {
+      "event": "process_phase1",
+      "timestamp": "2026-04-02T04:27:32"
+    },
+    {
+      "event": "get_potential_jobs",
+      "timestamp": "2026-04-02T04:27:59"
+    },
+    {
+      "event": "fetch_job_html",
+      "timestamp": "2026-04-02T04:28:42"
+    },
+    {
+      "event": "rank_job",
+      "timestamp": "2026-04-02T04:31:13"
+    },
+    {
+      "event": "rank_job",
+      "timestamp": "2026-04-02T04:31:14"
+    },
+    {
+      "event": "rank_job",
+      "timestamp": "2026-04-02T04:31:14"
+    },
+    {
+      "event": "rank_job",
+      "timestamp": "2026-04-02T04:31:15"
+    },
+    {
+      "event": "rank_job",
+      "timestamp": "2026-04-02T04:31:16"
+    },
+    {
+      "event": "rank_job",
+      "timestamp": "2026-04-02T04:31:16"
+    },
+    {
+      "event": "rank_job",
+      "timestamp": "2026-04-02T04:31:17"
+    },
+    {
+      "event": "rank_job",
+      "timestamp": "2026-04-02T04:31:17"
+    },
+    {
+      "event": "get_ranked_jobs",
+      "timestamp": "2026-04-02T04:31:33"
+    },
+    {
+      "event": "create_job_folders",
+      "timestamp": "2026-04-02T04:31:44"
+    },
+    {
+      "event": "get_potential_jobs",
+      "timestamp": "2026-04-02T04:51:25"
     }
   ]
 }

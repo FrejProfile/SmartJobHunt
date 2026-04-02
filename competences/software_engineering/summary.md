@@ -25,6 +25,10 @@
   software-in-the-loop testing with simulated sensor data. Relevant for vision
   and perception roles, not just robotics.
 
+## Software Design
+UML, design patterns, embedded software architecture, data types for embedded systems.
+See `competences/software_engineering/software_design/summary.md` for detail.
+
 ## Honest Framing
 Isaac Sim and ROS2 are worth loading for roles involving computer vision, synthetic
 data, sensor simulation or software-in-the-loop testing — not just robotics roles.
