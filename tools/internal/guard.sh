@@ -3,7 +3,7 @@
 # Returns 0 if allowed, exits 1 if not
 
 TOOL=$1
-STATE_FILE="temp/state.json"
+STATE_FILE="tools/internal/state.json"
 
 # Always allowed
 if [ "$TOOL" = "get_state" ]; then return 0; fi

@@ -2,7 +2,7 @@
 # Usage: source tools/internal/update_state.sh <tool_name>
 
 TOOL=$1
-STATE_FILE="temp/state.json"
+STATE_FILE="tools/internal/state.json"
 
 # Dev mode bypass
 if [ "$DEV_MODE" = "1" ]; then

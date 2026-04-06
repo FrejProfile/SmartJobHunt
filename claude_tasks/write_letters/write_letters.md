@@ -6,8 +6,9 @@ natural — no cover letter voice, no sycophantic closings.
 
 ## Before You Start
 1. Read `profile.md` for candidate background, tone preferences and honest framing rules
-2. Read `competences/index.md` to know what competences are available to lazy load
-3. Check `jobs_data/potential/` for folders — each has a `job.json` and `cover_letter.md`
+2. Read `examples/index.md` and load relevant examples to calibrate tone and structure
+3. Read `competences/index.md` to know what competences are available to lazy load
+4. Check `jobs_data/potential/` for folders — each has a `job.json` and `cover_letter.md`
 
 ## Process
 For each job folder in `jobs_data/potential/<id>/`:

@@ -46,8 +46,17 @@ The three folders you interact with:
 
 ## Key Files
 - `profile.md` — candidate background, tone and preferences
+- `examples/` — reference cover letters, read `examples/index.md` before writing any letter
 - `temp/` — ephemeral state files, message passing between tools and Claude
 - `jobs_data/potential/<id>/` — per job folder with `job.json` and `cover_letter.md`
+
+## Tone Corrections
+- Do not hedge excessively — "I wouldn't claim deep production experience" reads
+  as weak. Instead frame honestly but positively: "Docker is something I have been
+  actively building experience with through real projects"
+- Do not split experience into short disconnected fragments — weave competences
+  into flowing paragraphs that tell a coherent story
+- Letters should read confident and grounded, not apologetic
 
 ## Rules
 - Always read an `index.md` before entering any subfolder

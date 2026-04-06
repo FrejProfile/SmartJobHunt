@@ -7,7 +7,7 @@ source .venv/bin/activate
 python3 -c "
 import json, os
 
-STATE_FILE = 'temp/state.json'
+STATE_FILE = 'tools/internal/state.json'
 
 if not os.path.exists(STATE_FILE):
     print('No state file found. Initialize with:')
