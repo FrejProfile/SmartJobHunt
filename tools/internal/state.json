@@ -1,5 +1,5 @@
 {
-  "state": "7",
+  "state": "1",
   "history": [
     {
       "event": "scrape_overview",
@@ -252,6 +252,10 @@
     {
       "event": "scrape_overview",
       "timestamp": "2026-04-04T04:39:35"
+    },
+    {
+      "event": "scrape_overview",
+      "timestamp": "2026-04-07T15:59:53"
     }
   ]
 }

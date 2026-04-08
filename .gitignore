@@ -8,6 +8,8 @@ __pycache__/
 *.pyc
 temp/*
 jobs_data
+opencode.*
+.claude
 
 # Included
 !/competences/index.md
