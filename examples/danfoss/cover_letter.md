@@ -22,4 +22,3 @@ I would welcome the opportunity to discuss how I can contribute to your innovati
 Kind regards,
 
 Frej Karlinsky Scherfig  
-frejk@scherfig.dk · +45 50 55 30 03

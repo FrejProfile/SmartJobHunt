@@ -471,7 +471,25 @@
   {% endfor %}
 </main>
 
+<!-- Scrape modal -->
+<div id="scrape-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;">
+  <div style="background:#1a1a1a;border:1px solid #333;border-radius:8px;width:680px;max-width:95vw;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 16px 48px rgba(0,0,0,0.6);">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;border-bottom:1px solid #333;flex-shrink:0;">
+      <span style="font-size:0.875rem;font-weight:600;color:#e0e0e0;">Scraping Jobindex</span>
+      <span id="scrape-status" style="font-size:0.78rem;color:#aaa;">Running…</span>
+    </div>
+    <pre id="scrape-output" style="flex:1;overflow-y:auto;margin:0;padding:0.75rem 1rem;font-size:0.78rem;line-height:1.6;color:#a3e635;background:transparent;white-space:pre-wrap;word-break:break-all;min-height:200px;max-height:50vh;"></pre>
+    <div id="scrape-summary" style="display:none;padding:0.75rem 1rem;border-top:1px solid #333;font-size:0.82rem;color:#e0e0e0;"></div>
+    <div style="display:flex;justify-content:flex-end;gap:0.5rem;padding:0.65rem 1rem;border-top:1px solid #333;flex-shrink:0;">
+      <button id="scrape-refresh" style="display:none;padding:0.4rem 0.9rem;background:#2563eb;color:#fff;border:none;border-radius:4px;font-size:0.8rem;font-weight:600;cursor:pointer;">Refresh Jobs</button>
+      <button id="scrape-close" style="padding:0.4rem 0.9rem;background:none;color:#aaa;border:1px solid #444;border-radius:4px;font-size:0.8rem;cursor:pointer;">Close</button>
+    </div>
+  </div>
+</div>
+
 <div id="snippet-tooltip"></div>
+<script id="filter-files-data" type="application/json">{{ filter_files_json|safe }}</script>
+{% csrf_token %}
 
 <script>
   // ── Floating snippet tooltip ──
@@ -706,12 +724,251 @@
   document.addEventListener('click', () => toolsMenu.classList.remove('open'));
   toolsMenu.addEventListener('click', e => e.stopPropagation());
 
-  // Placeholder action handler
+  // ── Filter file state (embedded from server) ──
+  const filterFiles = JSON.parse(document.getElementById('filter-files-data').textContent);
+
+  function parseFilterLines(content) {
+    // Return a Set of existing terms from lines like "- term" or "# term"
+    const terms = new Set();
+    content.split('\n').forEach(line => {
+      const m = line.match(/^[-#]\s+(.+)/);
+      if (m) terms.add(m[1].trim().toLowerCase());
+    });
+    return terms;
+  }
+
+  function appendTerms(content, terms, prefix) {
+    // Append terms not already in content, using given line prefix ("- " or "# ")
+    const existing = parseFilterLines(content);
+    const toAdd = [...terms].filter(t => t && !existing.has(t.toLowerCase()));
+    if (!toAdd.length) return { content, added: [] };
+    const newLines = toAdd.map(t => prefix + t).join('\n');
+    const sep = content.endsWith('\n') ? '' : '\n';
+    return { content: content + sep + newLines + '\n', added: toAdd };
+  }
+
+  async function appendActiveFilters() {
+    const key = activeTableKey();
+    const { include, exclude } = filters[key];
+
+    if (!include.size && !exclude.size) {
+      showToast('No active filters to append.', 'warn');
+      return;
+    }
+
+    // exclude → filters.md ("- term"), include → search_words.md ("# term")
+    const excResult = appendTerms(filterFiles.filters,      exclude, '- ');
+    const incResult = appendTerms(filterFiles.search_words, include,  '# ');
+
+    const form = new FormData();
+    form.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+    form.append('content_filters',      excResult.content);
+    form.append('content_search_words', incResult.content);
+
+    const resp = await fetch('{{ append_filters_url }}', { method: 'POST', body: form });
+
+    if (resp.ok) {
+      // Update local state so repeated appends don't re-add
+      filterFiles.filters      = excResult.content;
+      filterFiles.search_words = incResult.content;
+
+      const added = [...excResult.added.map(t => `−${t}`), ...incResult.added.map(t => `+${t}`)];
+      showToast(added.length
+        ? `Appended: ${added.join(', ')}`
+        : 'All terms already in filter files.', 'ok');
+    } else {
+      showToast('Failed to save filter files.', 'error');
+    }
+  }
+
+  // ── Toast notifications ──
+  const TOAST_STYLES = {
+    ok:    { bg: '#166534', color: '#bbf7d0' },
+    warn:  { bg: '#854d0e', color: '#fef08a' },
+    error: { bg: '#7f1d1d', color: '#fecaca' },
+  };
+  function showToast(msg, type = 'ok') {
+    const s = TOAST_STYLES[type] || TOAST_STYLES.ok;
+    const t = document.createElement('div');
+    t.textContent = msg;
+    t.style.cssText = `position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;
+      padding:0.6rem 1rem;border-radius:6px;font-size:0.82rem;font-weight:500;
+      box-shadow:0 4px 12px rgba(0,0,0,0.2);transition:opacity 0.3s;
+      background:${s.bg};color:${s.color};`;
+    document.body.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
+  }
+
+  // ── Scrape ──
+  const scrapeModal  = document.getElementById('scrape-modal');
+  const scrapeOutput = document.getElementById('scrape-output');
+  const scrapeStatus = document.getElementById('scrape-status');
+  const scrapeSummary = document.getElementById('scrape-summary');
+  const scrapeRefresh = document.getElementById('scrape-refresh');
+
+  document.getElementById('scrape-close').addEventListener('click', () => {
+    scrapeModal.style.display = 'none';
+  });
+
+  scrapeRefresh.addEventListener('click', () => location.reload());
+
+  async function runScrape() {
+    scrapeModal.style.display = 'flex';
+    scrapeOutput.textContent = '';
+    scrapeStatus.textContent = 'Running…';
+    scrapeStatus.style.color = '#aaa';
+    scrapeSummary.style.display = 'none';
+    scrapeRefresh.style.display = 'none';
+
+    const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    let resp;
+    try {
+      resp = await fetch('{{ scrape_url }}', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrf },
+      });
+    } catch (e) {
+      scrapeStatus.textContent = 'Connection error';
+      scrapeStatus.style.color = '#f87171';
+      return;
+    }
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let newJobs = null, filtered = null, visited = null;
+    const filteredJobs = [];
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value, { stream: true });
+      for (const rawLine of chunk.split('\n')) {
+        const line = rawLine.trimEnd();
+        if (!line) continue;
+
+        // Parse exit code sentinel
+        if (line.startsWith('__exit_code__:')) {
+          const code = parseInt(line.split(':')[1]);
+          if (code !== 0) {
+            scrapeStatus.textContent = `Failed (exit ${code})`;
+            scrapeStatus.style.color = '#f87171';
+          }
+          continue;
+        }
+
+        // Colour-code output lines
+        let color = '#a3e635';
+        if (line.includes('[FILTERED]')) {
+          color = '#fb923c';
+          filteredJobs.push(line.replace(/.*\[FILTERED\]\s*/, ''));
+        } else if (line.startsWith('Done.')) {
+          color = '#34d399';
+          const m = line.match(/(\d+) new.*?(\d+) filtered.*?(\d+) already/);
+          if (m) { newJobs = +m[1]; filtered = +m[2]; visited = +m[3]; }
+        } else if (line.includes('Page ')) {
+          color = '#94a3b8';
+        }
+
+        const span = document.createElement('span');
+        span.style.color = color;
+        span.textContent = line + '\n';
+        scrapeOutput.appendChild(span);
+        scrapeOutput.scrollTop = scrapeOutput.scrollHeight;
+      }
+    }
+
+    // Show summary
+    if (newJobs !== null) {
+      scrapeStatus.textContent = 'Done';
+      scrapeStatus.style.color = '#34d399';
+      let html = `<strong style="color:#34d399">${newJobs} new job${newJobs !== 1 ? 's' : ''} added</strong>`;
+      html += ` &nbsp;·&nbsp; ${filtered} filtered &nbsp;·&nbsp; ${visited} already visited`;
+      if (filteredJobs.length) {
+        html += `<details style="margin-top:0.5rem"><summary style="cursor:pointer;color:#fb923c">`;
+        html += `${filteredJobs.length} filtered job${filteredJobs.length !== 1 ? 's' : ''}</summary>`;
+        html += `<ul style="margin:0.4rem 0 0 1rem;line-height:1.7">`;
+        filteredJobs.forEach(j => { html += `<li>${j}</li>`; });
+        html += '</ul></details>';
+      }
+      scrapeSummary.innerHTML = html;
+      scrapeSummary.style.display = 'block';
+      if (newJobs > 0) scrapeRefresh.style.display = 'inline-block';
+    } else if (scrapeStatus.textContent === 'Running…') {
+      scrapeStatus.textContent = 'Done';
+      scrapeStatus.style.color = '#aaa';
+    }
+  }
+
+  // ── Delete selected ──
+  async function deleteSelected() {
+    const key     = activeTableKey();
+    const section = document.getElementById('section-' + key);
+    const checked = [...section.querySelectorAll('tbody input[type="checkbox"]:checked')];
+
+    if (!checked.length) {
+      showToast('No rows selected.', 'warn');
+      return;
+    }
+
+    const ids  = checked.map(cb => cb.value);
+    const noun = `${ids.length} job${ids.length !== 1 ? 's' : ''}`;
+
+    if (!confirm(`Delete ${noun}? This cannot be undone. Visited URLs will be kept.`)) return;
+
+    const csrfEl = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (!csrfEl) { showToast('CSRF token missing — reload the page.', 'error'); return; }
+
+    let resp;
+    try {
+      resp = await fetch('{{ delete_url }}', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrfEl.value, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids, table: key }),
+      });
+    } catch (e) {
+      showToast('Network error: ' + e.message, 'error');
+      return;
+    }
+
+    if (!resp.ok) {
+      const text = await resp.text();
+      console.error('delete_jobs failed', resp.status, text);
+      showToast(`Server error ${resp.status} — check console.`, 'error');
+      return;
+    }
+
+    let data;
+    try {
+      data = await resp.json();
+    } catch (e) {
+      showToast('Unexpected response from server.', 'error');
+      return;
+    }
+
+    if (data.ok) {
+      checked.forEach(cb => cb.closest('tr').remove());
+      updateMeta(key);
+      showToast(`Deleted ${noun}.`, 'ok');
+    } else {
+      showToast(data.error || 'Delete failed.', 'error');
+    }
+  }
+
+  // ── Tool action dispatch ──
   toolsMenu.querySelectorAll('.menu-item[data-action]').forEach(item => {
     item.addEventListener('click', () => {
       const action = item.dataset.action;
       toolsMenu.classList.remove('open');
-      console.log('Tool action (not yet implemented):', action);
+      if (action === 'scrape') {
+        runScrape();
+      } else if (action === 'delete_selected') {
+        deleteSelected();
+      } else if (action === 'append_active_filters') {
+        appendActiveFilters();
+      } else {
+        console.log('Tool action (not yet implemented):', action);
+      }
     });
   });
 </script>

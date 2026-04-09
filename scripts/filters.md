@@ -1,5 +1,5 @@
 - senior
-- universitet
+- universit
 - phd
 - postdoc
 - forsvaret
@@ -9,7 +9,7 @@
 - business
 - afdelingsleder
 - praktik
-- teamleder
+- leder
 - kundeservice
 - sælger
 - butiksmedarbejder
@@ -19,4 +19,12 @@
 - kulturhusbestyrer
 - salgsassistent
 - sdu
-
+- financial
+- chief
+- accountant
+- controller
+- chef
+- student
+- økonom
+- director
+- leder

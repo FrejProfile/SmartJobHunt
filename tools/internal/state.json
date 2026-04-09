@@ -1,5 +1,5 @@
 {
-  "state": "1",
+  "state": "7",
   "history": [
     {
       "event": "scrape_overview",
@@ -256,6 +256,22 @@
     {
       "event": "scrape_overview",
       "timestamp": "2026-04-07T15:59:53"
+    },
+    {
+      "event": "get_potential_jobs",
+      "timestamp": "2026-04-09T14:34:39"
+    },
+    {
+      "event": "process_phase1",
+      "timestamp": "2026-04-09T14:39:50"
+    },
+    {
+      "event": "get_ranked_jobs",
+      "timestamp": "2026-04-09T17:15:20"
+    },
+    {
+      "event": "create_job_folders",
+      "timestamp": "2026-04-09T17:15:31"
     }
   ]
 }

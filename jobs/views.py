@@ -1,7 +1,10 @@
+import json
 import os
+import subprocess
+import sys
 
 from django.db.models import F
-from django.http import Http404
+from django.http import Http404, HttpResponseNotAllowed, JsonResponse, StreamingHttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
@@ -72,6 +75,52 @@ def active_filters(request):
     })
 
 
+# ── Delete selected jobs ─────────────────────────────────────────────────────
+
+def delete_jobs(request):
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+
+    data = json.loads(request.body)
+    ids   = [int(i) for i in data.get('ids', []) if str(i).isdigit()]
+    table = data.get('table', 'job')
+
+    if not ids:
+        return JsonResponse({'ok': False, 'error': 'No ids provided'}, status=400)
+
+    if table == 'rankedjob':
+        # IDs are RankedJob PKs — delete the parent Job (RankedJob cascades)
+        count, _ = Job.objects.filter(rankedjob__id__in=ids).delete()
+    else:
+        # IDs are Job PKs
+        count, _ = Job.objects.filter(id__in=ids).delete()
+
+    return JsonResponse({'ok': True, 'deleted': count})
+
+
+# ── Scrape ───────────────────────────────────────────────────────────────────
+
+def scrape_jobs(request):
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+
+    def generate():
+        proc = subprocess.Popen(
+            [sys.executable, '-u', 'manage.py', 'scrape_overview', '--verbose'],
+            cwd=_BASE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+        )
+        for line in iter(proc.stdout.readline, ''):
+            yield line
+        proc.wait()
+        yield f'__exit_code__:{proc.returncode}\n'
+
+    return StreamingHttpResponse(generate(), content_type='text/plain; charset=utf-8')
+
+
 # ── Table browser ────────────────────────────────────────────────────────────
 
 def table_browser(request):
@@ -138,4 +187,13 @@ def table_browser(request):
             for row in table['rows']
         ]
 
-    return render(request, 'jobs/table_browser.html', {'tables': tables})
+    return render(request, 'jobs/table_browser.html', {
+        'tables': tables,
+        'filter_files_json': json.dumps({
+            'filters':      _read_file('filters'),
+            'search_words': _read_file('search_words'),
+        }),
+        'append_filters_url': reverse('jobs:active_filters'),
+        'scrape_url': reverse('jobs:scrape_jobs'),
+        'delete_url': reverse('jobs:delete_jobs'),
+    })

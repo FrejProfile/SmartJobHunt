@@ -11,8 +11,8 @@ Completed all coursework for a Master of Mechatronics (Embedded Systems) at
 SDU Sønderborg including all master's level courses. Did not complete the
 master's thesis and therefore did not formally graduate.
 
-Honest framing: "studied at master's level and completed all courses" or
-"completed all coursework for a master's degree in mechatronics". Never claim
+Honest framing: "during my studies" or
+"during my mechatronic's study at sdu". Never claim
 the master's degree title. Never hide the situation either — if asked, be direct.
 
 ## Target Roles
@@ -26,6 +26,23 @@ Jobs related to my competences
 - No bullet points in cover letters — flowing prose only
 - Approximately one page in length
 - Match language to job posting — Danish posting gets a Danish letter, English gets English
+- Do never use "—" it stops the flow and sounds like ai
+- Be precise when describing experience
+- Dont start or end with short senteces of a couple words, in most cases.
+- In some job applications we can offer them things outside specific request:
+  An example could be: We can simulate mechanical systems and have faster and cheaper test iterations,
+  compaired to only testing on physical products.
+- Only create a header at the top of the page
+- Rather decrease heading size and use the extra space to decrease listing of skills that instead gets more text.
+- Never use "enough" in relation to experience. Other phrasing could be:
+  "extended experience", "extended background", "though my studies/work/hobbies"
+
+## Aplication Introduction
+- Direct introduction directly towards people listed on the job add
+
+
+
+## Aplication Ending
 
 ## Honest Framing Rules
 - Never overclaim seniority — student projects are student projects, say so
