@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ title }} — Job Pipeline</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: system-ui, sans-serif;
+      background: #f5f5f5;
+      color: #1a1a1a;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #1a1a1a;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      padding: 0.75rem 2rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      flex-shrink: 0;
+    }
+
+    .back-link {
+      color: #aaa;
+      text-decoration: none;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .back-link:hover { color: #fff; }
+
+    .header-divider {
+      color: #444;
+      font-size: 0.875rem;
+    }
+
+    header h1 {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+
+    .save-btn {
+      margin-left: auto;
+      padding: 0.4rem 1.1rem;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .save-btn:hover { background: #1d4ed8; }
+
+    /* ── Editor area ── */
+    main {
+      flex: 1;
+      display: flex;
+      gap: 1.25rem;
+      padding: 1.5rem 2rem;
+      overflow: hidden;
+    }
+
+    .editor-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .panel-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #666;
+      margin-bottom: 0.5rem;
+    }
+
+    textarea {
+      flex: 1;
+      width: 100%;
+      padding: 0.85rem 1rem;
+      font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+      font-size: 0.875rem;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      resize: none;
+      outline: none;
+      tab-size: 2;
+    }
+    textarea:focus { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,0.15); }
+  </style>
+</head>
+<body>
+
+<form method="post" action="{{ save_url }}" style="display:contents;">
+  {% csrf_token %}
+
+  <header>
+    <a class="back-link" href="{{ back_url }}">← Back</a>
+    <span class="header-divider">/</span>
+    <h1>{{ title }}</h1>
+    <button type="submit" class="save-btn">Save</button>
+  </header>
+
+  <main>
+    {% for file in files %}
+    <div class="editor-panel">
+      <p class="panel-label">{{ file.label }}</p>
+      <textarea name="content_{{ file.slug }}" spellcheck="false" autocomplete="off">{{ file.content }}</textarea>
+    </div>
+    {% endfor %}
+  </main>
+
+</form>
+
+</body>
+</html>

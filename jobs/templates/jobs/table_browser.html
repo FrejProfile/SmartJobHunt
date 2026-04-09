@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Job Pipeline</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: system-ui, sans-serif;
+      background: #f5f5f5;
+      color: #1a1a1a;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Sticky header ── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #1a1a1a;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      padding: 0.75rem 2rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+
+    header h1 {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+
+    select {
+      padding: 0.35rem 0.65rem;
+      border: 1px solid #444;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      background: #2a2a2a;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    /* ── Header nav link ── */
+    a.header-link {
+      color: #aaa;
+      text-decoration: none;
+      font-size: 0.875rem;
+    }
+    a.header-link:hover { color: #fff; }
+
+    /* ── Tools dropdown ── */
+    .tools-menu {
+      position: relative;
+    }
+
+    .tools-trigger {
+      padding: 0.35rem 0.75rem;
+      border: 1px solid #444;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      background: #2a2a2a;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      white-space: nowrap;
+    }
+    .tools-trigger:hover { background: #3a3a3a; }
+    .tools-trigger .arrow { font-size: 0.65rem; opacity: 0.7; transition: transform 0.15s; }
+    .tools-menu.open .tools-trigger .arrow { transform: rotate(180deg); }
+
+    .tools-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      z-index: 100;
+      background: #2a2a2a;
+      border: 1px solid #444;
+      border-radius: 6px;
+      min-width: 180px;
+      padding: 0.3rem 0;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    }
+    .tools-menu.open .tools-dropdown { display: block; }
+
+    .tools-dropdown li {
+      list-style: none;
+      position: relative;
+    }
+
+    .tools-dropdown .menu-item,
+    .tools-dropdown .menu-parent {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.45rem 0.85rem;
+      font-size: 0.875rem;
+      color: #e0e0e0;
+      cursor: pointer;
+      user-select: none;
+      gap: 0.5rem;
+      white-space: nowrap;
+    }
+    .tools-dropdown .menu-item:hover,
+    .tools-dropdown .menu-parent:hover { background: #3a3a3a; color: #fff; }
+
+    .tools-dropdown .menu-parent .sub-arrow { font-size: 0.65rem; opacity: 0.6; }
+
+    .submenu {
+      display: none;
+      position: absolute;
+      top: -0.3rem;
+      left: 100%;
+      background: #2a2a2a;
+      border: 1px solid #444;
+      border-radius: 6px;
+      min-width: 160px;
+      padding: 0.3rem 0;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    }
+    .tools-dropdown li:hover > .submenu { display: block; }
+
+    .submenu .menu-item {
+      padding: 0.45rem 0.85rem;
+      font-size: 0.875rem;
+      color: #e0e0e0;
+      cursor: pointer;
+      user-select: none;
+    }
+    .submenu .menu-item:hover { background: #3a3a3a; color: #fff; }
+
+    .tools-dropdown hr {
+      border: none;
+      border-top: 1px solid #444;
+      margin: 0.3rem 0;
+    }
+
+    /* ── Filter bar ── */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-left: auto;
+    }
+
+    .filter-bar input {
+      padding: 0.35rem 0.65rem;
+      border: 1px solid #444;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      background: #2a2a2a;
+      color: #fff;
+      width: 180px;
+      outline: none;
+    }
+
+    .filter-bar input::placeholder { color: #888; }
+    .filter-bar input:focus { border-color: #666; }
+
+    .filter-btn {
+      padding: 0.35rem 0.7rem;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .filter-btn.include {
+      background: #166534;
+      color: #bbf7d0;
+    }
+    .filter-btn.include:hover { background: #15803d; }
+
+    .filter-btn.exclude {
+      background: #7f1d1d;
+      color: #fecaca;
+    }
+    .filter-btn.exclude:hover { background: #991b1b; }
+
+    /* ── Scrollable body ── */
+    main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 2rem;
+    }
+
+    .table-section { display: none; }
+    .table-section.active { display: block; }
+
+    .table-meta {
+      font-size: 0.8rem;
+      color: #888;
+      margin-bottom: 0.5rem;
+    }
+
+    /* ── Filter chips ── */
+    .filter-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 0.6rem;
+      min-height: 0;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    .chip.include {
+      background: #dcfce7;
+      color: #14532d;
+      border: 1px solid #86efac;
+    }
+
+    .chip.exclude {
+      background: #fee2e2;
+      color: #7f1d1d;
+      border: 1px solid #fca5a5;
+    }
+
+    .chip-remove {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.85rem;
+      line-height: 1;
+      padding: 0;
+      color: inherit;
+      opacity: 0.7;
+    }
+    .chip-remove:hover { opacity: 1; }
+
+    .table-wrapper {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      overflow: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    thead tr {
+      background: #f0f0f0;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th, td {
+      padding: 0.6rem 0.875rem;
+      text-align: left;
+    }
+
+    th {
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #555;
+      white-space: nowrap;
+    }
+
+    th.sortable {
+      cursor: pointer;
+      user-select: none;
+    }
+    th.sortable:hover { color: #222; }
+    th.sortable::after { content: ' ⇅'; opacity: 0.35; font-size: 0.75em; }
+    th.sort-asc::after  { content: ' ↑'; opacity: 1; }
+    th.sort-desc::after { content: ' ↓'; opacity: 1; }
+
+    th:first-child, td:first-child {
+      width: 2.5rem;
+      text-align: center;
+    }
+
+    tbody tr { border-bottom: 1px solid #f0f0f0; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #fafafa; }
+    tbody tr.selected { background: #eef4ff; }
+    tbody tr.hidden { display: none; }
+
+    input[type="checkbox"] { cursor: pointer; }
+
+    /* ── URL cells ── */
+    td.url-cell {
+      width: 80px;
+      max-width: 80px;
+    }
+
+    a.cell-link {
+      display: block;
+      width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #2563eb;
+      text-decoration: none;
+      font-size: 0.8rem;
+    }
+    a.cell-link:hover { text-decoration: underline; }
+
+    /* ── Narrow cells ── */
+    td.narrow-cell {
+      width: 40ch;
+    }
+
+    /* ── Wrap cells ── */
+    td.wrap-cell {
+      width: 60ch;
+      white-space: normal;
+      word-break: break-word;
+      line-height: 1.4;
+    }
+
+    /* ── Snippet cells: truncate + hover expand ── */
+    td.snippet-cell {
+      width: 40ch;
+      cursor: default;
+    }
+
+    td.snippet-cell .snippet-text {
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Floating tooltip rendered on <body> to escape overflow:auto clipping */
+    #snippet-tooltip {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 0.6rem 0.75rem;
+      white-space: normal;
+      width: 360px;
+      font-size: 0.8rem;
+      line-height: 1.5;
+      color: #333;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      pointer-events: none;
+    }
+
+    .empty {
+      padding: 2rem;
+      text-align: center;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Job Pipeline</h1>
+  <select id="table-select">
+    {% for table in tables %}
+    <option value="{{ table.key }}">{{ table.label }}</option>
+    {% endfor %}
+  </select>
+
+  <a class="header-link" href="{% url 'jobs:active_filters' %}">Edit Filters</a>
+
+  <div class="tools-menu" id="tools-menu">
+    <button class="tools-trigger" id="tools-trigger">
+      Tools <span class="arrow">▼</span>
+    </button>
+    <ul class="tools-dropdown">
+      <li><span class="menu-item" data-action="scrape">Scrape</span></li>
+      <li>
+        <span class="menu-parent">Rank <span class="sub-arrow">▶</span></span>
+        <ul class="submenu">
+          <li><span class="menu-item" data-action="rank_all">Rank All</span></li>
+          <li><span class="menu-item" data-action="rank_selected">Rank Selected</span></li>
+        </ul>
+      </li>
+      <li><hr></li>
+      <li><span class="menu-item" data-action="delete_selected">Delete Selected</span></li>
+      <li><span class="menu-item" data-action="check_urls">Check URLs</span></li>
+      <li><hr></li>
+      <li>
+        <span class="menu-parent">Write Cover Letters <span class="sub-arrow">▶</span></span>
+        <ul class="submenu">
+          <li><span class="menu-item" data-action="write_selected">Write Selected</span></li>
+          <li><span class="menu-item" data-action="write_filtered">Write Filtered</span></li>
+        </ul>
+      </li>
+      <li><span class="menu-item" data-action="process_jobs">Process Jobs</span></li>
+      <li><hr></li>
+      <li><span class="menu-item" data-action="append_active_filters">Append Active Filters</span></li>
+    </ul>
+  </div>
+
+  <div class="filter-bar">
+    <input type="text" id="filter-input" placeholder="Filter rows…">
+    <button class="filter-btn include" id="btn-include" title="Include rows containing this term">+</button>
+    <button class="filter-btn exclude" id="btn-exclude" title="Exclude rows containing this term">−</button>
+  </div>
+</header>
+
+<main>
+  {% for table in tables %}
+  <div class="table-section{% if forloop.first %} active{% endif %}" id="section-{{ table.key }}">
+    <p class="table-meta" id="meta-{{ table.key }}">{{ table.shaped_rows|length }} row{{ table.shaped_rows|length|pluralize }}</p>
+    <div class="filter-chips" id="chips-{{ table.key }}"></div>
+    <div class="table-wrapper">
+      {% if table.shaped_rows %}
+      <table>
+        <thead>
+          <tr>
+            <th><input type="checkbox" class="select-all" data-table="{{ table.key }}"></th>
+            {% for col in table.col_meta %}
+            <th{% if col.sortable %} class="sortable" data-col="{{ forloop.counter }}"{% endif %}>{{ col.header }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in table.shaped_rows %}
+          <tr>
+            <td><input type="checkbox" name="selected" value="{{ row.pk }}"></td>
+            {% for cell in row.cells %}
+              {% if cell.type == 'url' %}
+              <td class="url-cell"><a class="cell-link" href="{{ cell.value }}" target="_blank" rel="noopener">{{ cell.value }}</a></td>
+              {% elif cell.type == 'snippet' %}
+              <td class="snippet-cell" data-snippet="{{ cell.value|escapejs }}">
+                <span class="snippet-text">{{ cell.value|truncatechars:60 }}</span>
+              </td>
+              {% elif cell.type == 'wrap' %}
+              <td class="wrap-cell">{{ cell.value }}</td>
+              {% elif cell.type == 'narrow' %}
+              <td class="narrow-cell">{{ cell.value }}</td>
+              {% else %}
+              <td>{{ cell.value }}</td>
+              {% endif %}
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="empty">No records found.</p>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</main>
+
+<div id="snippet-tooltip"></div>
+
+<script>
+  // ── Floating snippet tooltip ──
+  const floatingTip = document.getElementById('snippet-tooltip');
+  const MARGIN = 8; // px gap from cell edge
+
+  document.addEventListener('mouseover', e => {
+    const cell = e.target.closest('td.snippet-cell');
+    if (!cell || !cell.dataset.snippet) return;
+    floatingTip.textContent = cell.dataset.snippet;
+    floatingTip.style.display = 'block';
+    positionTip(cell);
+  });
+
+  document.addEventListener('mouseout', e => {
+    if (!e.target.closest('td.snippet-cell')) return;
+    floatingTip.style.display = 'none';
+  });
+
+  function positionTip(cell) {
+    const rect = cell.getBoundingClientRect();
+    const tipH = floatingTip.offsetHeight;
+    const tipW = floatingTip.offsetWidth;
+    const viewH = window.innerHeight;
+    const viewW = window.innerWidth;
+
+    // Prefer below; flip above if it would overflow viewport bottom
+    let top = rect.bottom + MARGIN;
+    if (top + tipH > viewH - MARGIN) {
+      top = rect.top - tipH - MARGIN;
+    }
+
+    // Align to cell left; clamp so it doesn't overflow right edge
+    let left = rect.left;
+    if (left + tipW > viewW - MARGIN) {
+      left = viewW - tipW - MARGIN;
+    }
+
+    floatingTip.style.top  = top  + 'px';
+    floatingTip.style.left = left + 'px';
+  }
+</script>
+
+<script>
+  const tableSelect = document.getElementById('table-select');
+  const filterInput = document.getElementById('filter-input');
+
+  // Per-table filter state: { include: Set, exclude: Set }
+  const filters = {};
+  {% for table in tables %}
+  filters['{{ table.key }}'] = { include: new Set(), exclude: new Set() };
+  {% endfor %}
+
+  function activeTableKey() {
+    return tableSelect.value;
+  }
+
+  function rowText(tr) {
+    // Collect text from all cells except the checkbox column
+    return Array.from(tr.querySelectorAll('td:not(:first-child)'))
+      .map(td => td.textContent.trim())
+      .join(' ')
+      .toLowerCase();
+  }
+
+  function applyFilters(key) {
+    const section = document.getElementById('section-' + key);
+    if (!section) return;
+    const tbody = section.querySelector('tbody');
+    if (!tbody) return;
+
+    const { include, exclude } = filters[key];
+    let visible = 0;
+    const total = tbody.querySelectorAll('tr').length;
+
+    tbody.querySelectorAll('tr').forEach(tr => {
+      const text = rowText(tr);
+      const passInclude = include.size === 0 || [...include].every(t => text.includes(t));
+      const passExclude = exclude.size === 0 || ![...exclude].some(t => text.includes(t));
+      const show = passInclude && passExclude;
+      tr.classList.toggle('hidden', !show);
+      if (show) visible++;
+    });
+
+    updateMeta(key, visible, total);
+  }
+
+  function updateMeta(key, visibleOverride, totalOverride) {
+    const section = document.getElementById('section-' + key);
+    const meta = document.getElementById('meta-' + key);
+    if (!meta || !section) return;
+
+    const tbody = section.querySelector('tbody');
+    const total = totalOverride ?? (tbody ? tbody.querySelectorAll('tr').length : 0);
+    const visible = visibleOverride ?? (tbody ? tbody.querySelectorAll('tr:not(.hidden)').length : total);
+    const selected = tbody ? tbody.querySelectorAll('tr.selected:not(.hidden)').length : 0;
+
+    const { include, exclude } = filters[key];
+    let text = (include.size === 0 && exclude.size === 0)
+      ? `${total} row${total !== 1 ? 's' : ''}`
+      : `${visible} of ${total} row${total !== 1 ? 's' : ''} shown`;
+
+    if (selected > 0) text += ` · ${selected} selected`;
+    meta.textContent = text;
+  }
+
+  function renderChips(key) {
+    const container = document.getElementById('chips-' + key);
+    if (!container) return;
+    container.innerHTML = '';
+
+    const { include, exclude } = filters[key];
+
+    include.forEach(term => {
+      const chip = makeChip(term, 'include', () => {
+        filters[key].include.delete(term);
+        renderChips(key);
+        applyFilters(key);
+      });
+      container.appendChild(chip);
+    });
+
+    exclude.forEach(term => {
+      const chip = makeChip(term, 'exclude', () => {
+        filters[key].exclude.delete(term);
+        renderChips(key);
+        applyFilters(key);
+      });
+      container.appendChild(chip);
+    });
+  }
+
+  function makeChip(term, type, onRemove) {
+    const chip = document.createElement('span');
+    chip.className = `chip ${type}`;
+    chip.textContent = (type === 'include' ? '+' : '−') + ' ' + term;
+
+    const btn = document.createElement('button');
+    btn.className = 'chip-remove';
+    btn.textContent = '×';
+    btn.title = 'Remove filter';
+    btn.addEventListener('click', onRemove);
+    chip.appendChild(btn);
+    return chip;
+  }
+
+  function addFilter(type) {
+    const term = filterInput.value.trim().toLowerCase();
+    if (!term) return;
+    const key = activeTableKey();
+    filters[key][type].add(term);
+    // If in both sets, prefer the one just added, remove from the other
+    const other = type === 'include' ? 'exclude' : 'include';
+    filters[key][other].delete(term);
+    filterInput.value = '';
+    renderChips(key);
+    applyFilters(key);
+    filterInput.focus();
+  }
+
+  document.getElementById('btn-include').addEventListener('click', () => addFilter('include'));
+  document.getElementById('btn-exclude').addEventListener('click', () => addFilter('exclude'));
+
+  filterInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') addFilter('include');
+  });
+
+  // ── Table switching ──
+  function showTable(key) {
+    document.querySelectorAll('.table-section').forEach(el => el.classList.remove('active'));
+    document.getElementById('section-' + key).classList.add('active');
+  }
+
+  tableSelect.addEventListener('change', () => showTable(tableSelect.value));
+
+  // ── Select-all checkboxes ──
+  document.querySelectorAll('.select-all').forEach(selectAll => {
+    selectAll.addEventListener('change', function () {
+      const key = this.dataset.table;
+      const section = document.getElementById('section-' + key);
+      section.querySelectorAll('tbody tr:not(.hidden) input[type="checkbox"]').forEach(cb => {
+        cb.checked = this.checked;
+        cb.closest('tr').classList.toggle('selected', this.checked);
+      });
+      updateMeta(key);
+    });
+  });
+
+  document.querySelectorAll('tbody input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', function () {
+      this.closest('tr').classList.toggle('selected', this.checked);
+      const key = this.closest('.table-section').id.replace('section-', '');
+      updateMeta(key);
+    });
+  });
+
+  // ── Column sorting ──
+  document.querySelectorAll('th.sortable').forEach(th => {
+    th.addEventListener('click', function () {
+      const table = this.closest('table');
+      const tbody = table.querySelector('tbody');
+      const colIndex = parseInt(this.dataset.col); // 1-based; td[0] is checkbox
+      const asc = !this.classList.contains('sort-asc');
+
+      table.querySelectorAll('th.sortable').forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
+      this.classList.add(asc ? 'sort-asc' : 'sort-desc');
+
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      rows.sort((a, b) => {
+        const aText = a.cells[colIndex]?.textContent.trim() ?? '';
+        const bText = b.cells[colIndex]?.textContent.trim() ?? '';
+        const aVal = Date.parse(aText) || parseFloat(aText);
+        const bVal = Date.parse(bText) || parseFloat(bText);
+        if (!isNaN(aVal) && !isNaN(bVal)) return asc ? aVal - bVal : bVal - aVal;
+        return asc ? aText.localeCompare(bText) : bText.localeCompare(aText);
+      });
+
+      rows.forEach(r => tbody.appendChild(r));
+    });
+  });
+
+  // ── Tools dropdown ──
+  const toolsMenu = document.getElementById('tools-menu');
+  const toolsTrigger = document.getElementById('tools-trigger');
+
+  toolsTrigger.addEventListener('click', e => {
+    e.stopPropagation();
+    toolsMenu.classList.toggle('open');
+  });
+
+  // Close when clicking outside
+  document.addEventListener('click', () => toolsMenu.classList.remove('open'));
+  toolsMenu.addEventListener('click', e => e.stopPropagation());
+
+  // Placeholder action handler
+  toolsMenu.querySelectorAll('.menu-item[data-action]').forEach(item => {
+    item.addEventListener('click', () => {
+      const action = item.dataset.action;
+      toolsMenu.classList.remove('open');
+      console.log('Tool action (not yet implemented):', action);
+    });
+  });
+</script>
+
+</body>
+</html>

@@ -3,6 +3,7 @@
 - phd
 - postdoc
 - forsvaret
+- forsvar
 - defence
 - lead
 - business
@@ -17,3 +18,5 @@
 - salgsledere
 - kulturhusbestyrer
 - salgsassistent
+- sdu
+
