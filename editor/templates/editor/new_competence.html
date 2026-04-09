@@ -1,0 +1,92 @@
+{% extends 'editor/base.html' %}
+{% block title %}New Competence{% endblock %}
+
+{% block content %}
+<style>
+  .form-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1.5rem;
+    max-width: 480px;
+  }
+
+  .form-card h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+  }
+
+  label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.4rem;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    outline: none;
+    margin-bottom: 0.5rem;
+  }
+  input[type="text"]:focus { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,0.15); }
+
+  .hint {
+    font-size: 0.78rem;
+    color: #888;
+    margin-bottom: 1.25rem;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .btn {
+    padding: 0.45rem 1rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .btn-primary { background: #2563eb; color: #fff; }
+  .btn-primary:hover { background: #1d4ed8; }
+  .btn-ghost { background: none; color: #555; border: 1px solid #ccc; }
+  .btn-ghost:hover { background: #f0f0f0; }
+</style>
+
+<div class="form-card">
+  <h2>
+    {% if parent_label %}
+      New subcategory under {{ parent_label }}
+    {% else %}
+      New category
+    {% endif %}
+  </h2>
+
+  <form method="post">
+    {% csrf_token %}
+    <label for="name">Name</label>
+    <input type="text" id="name" name="name" placeholder="e.g. machine_learning" autofocus>
+    <p class="hint">Will be used as the folder name. Spaces and special characters become underscores.</p>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Create</button>
+      <a class="btn btn-ghost" href="{% url 'editor:competences' %}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends 'editor/base.html' %}
+{% block title %}Cover Letters{% endblock %}
+
+{% block content %}
+<style>
+  h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+  }
+
+  .letters-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .letter-row {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-decoration: none;
+    color: inherit;
+  }
+  .letter-row:hover { background: #f5f8ff; border-color: #bcd; }
+
+  .letter-meta {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .letter-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .letter-employer {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 0.15rem;
+  }
+
+  .letter-id {
+    font-size: 0.78rem;
+    color: #aaa;
+    flex-shrink: 0;
+  }
+
+  .empty {
+    color: #999;
+    text-align: center;
+    padding: 2rem;
+  }
+</style>
+
+<h2>Cover Letters</h2>
+
+<div class="letters-list">
+  {% for entry in entries %}
+  <a class="letter-row" href="{% url 'editor:edit_cover_letter' job_id=entry.id %}">
+    <div class="letter-meta">
+      {% if entry.job %}
+      <div class="letter-title">{{ entry.job.title }}</div>
+      <div class="letter-employer">{{ entry.job.employer }}</div>
+      {% else %}
+      <div class="letter-title">Job #{{ entry.id }}</div>
+      <div class="letter-employer">—</div>
+      {% endif %}
+    </div>
+    <span class="letter-id">#{{ entry.id }}</span>
+  </a>
+  {% empty %}
+  <p class="empty">No cover letters found.</p>
+  {% endfor %}
+</div>
+{% endblock %}

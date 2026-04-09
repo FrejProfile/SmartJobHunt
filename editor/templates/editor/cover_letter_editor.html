@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ title }} — Job Pipeline</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: system-ui, sans-serif;
+      background: #f5f5f5;
+      color: #1a1a1a;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #1a1a1a;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      padding: 0.75rem 2rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      flex-shrink: 0;
+    }
+
+    .back-link {
+      color: #aaa;
+      text-decoration: none;
+      font-size: 0.875rem;
+    }
+    .back-link:hover { color: #fff; }
+
+    .header-divider { color: #444; font-size: 0.875rem; }
+
+    header h1 {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      flex: 1;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn {
+      padding: 0.4rem 0.9rem;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .btn-primary { background: #2563eb; color: #fff; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-secondary { background: #3a3a3a; color: #e0e0e0; border: 1px solid #555; }
+    .btn-secondary:hover { background: #4a4a4a; }
+
+    /* ── Editor ── */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 2rem;
+      overflow: hidden;
+    }
+
+    .panel-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #666;
+      margin-bottom: 0.5rem;
+    }
+
+    textarea {
+      flex: 1;
+      width: 100%;
+      padding: 0.85rem 1rem;
+      font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+      font-size: 0.875rem;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      resize: none;
+      outline: none;
+      tab-size: 2;
+    }
+    textarea:focus { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,0.15); }
+
+    /* ── Preview modal ── */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #3a3a3a;
+      z-index: 100;
+      flex-direction: column;
+      align-items: center;
+      overflow-y: auto;
+    }
+    .modal-backdrop.open { display: flex; }
+
+    /* Floating toolbar pinned to top of scroll container */
+    .modal-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.65rem 1.5rem;
+      background: rgba(30,30,30,0.92);
+      backdrop-filter: blur(4px);
+      flex-shrink: 0;
+    }
+
+    .modal-toolbar h2 {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #ccc;
+    }
+
+    .toolbar-actions { display: flex; gap: 0.5rem; }
+
+    .btn-print { background: #166534; color: #bbf7d0; border: none; }
+    .btn-print:hover { background: #15803d; }
+    .btn-close { background: none; border: 1px solid #555; color: #ccc; }
+    .btn-close:hover { background: rgba(255,255,255,0.1); }
+
+    /* A4 paper: 210mm × 297mm = 794px × 1123px at 96dpi */
+    .a4-page {
+      width: 794px;
+      min-height: 1123px;
+      background: #fff;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.5);
+      margin: 2rem auto;
+      flex-shrink: 0;
+    }
+
+    /* ── Letter preview typography ── */
+    .letter-preview {
+      padding: 96px 96px;   /* ~25mm margins */
+      font-family: 'Georgia', 'Times New Roman', serif;
+      font-size: 11pt;
+      line-height: 1.75;
+      color: #1a1a1a;
+    }
+
+    .letter-preview h1,
+    .letter-preview h2,
+    .letter-preview h3 {
+      font-family: system-ui, sans-serif;
+      margin: 1.25rem 0 0.5rem;
+    }
+    .letter-preview h1 { font-size: 1.3rem; }
+    .letter-preview h2 { font-size: 1.1rem; }
+    .letter-preview h3 { font-size: 1rem; }
+
+    .letter-preview p { margin-bottom: 1rem; }
+    .letter-preview p:last-child { margin-bottom: 0; }
+
+    .letter-preview ul,
+    .letter-preview ol {
+      margin: 0.5rem 0 1rem 1.5rem;
+    }
+
+    .letter-preview li { margin-bottom: 0.25rem; }
+
+    .letter-preview strong { font-weight: 700; }
+    .letter-preview em { font-style: italic; }
+
+    .letter-preview hr {
+      border: none;
+      border-top: 1px solid #ddd;
+      margin: 1.5rem 0;
+    }
+
+    /* ── Print styles ── */
+    @media print {
+      @page { size: A4; margin: 0; }
+
+      body > *         { display: none !important; }
+      .modal-backdrop  { display: block !important; position: static !important;
+                         background: none !important; overflow: visible !important; }
+      .modal-toolbar   { display: none !important; }
+      .a4-page         { width: 100% !important; min-height: unset !important;
+                         box-shadow: none !important; margin: 0 !important; }
+      .letter-preview  { padding: 2cm 2.5cm !important; font-size: 11pt !important; }
+    }
+  </style>
+</head>
+<body>
+
+<form method="post" action="{{ save_url }}" style="display:contents;">
+  {% csrf_token %}
+
+  <header>
+    <a class="back-link" href="{{ back_url }}">← Back</a>
+    <span class="header-divider">/</span>
+    <h1>{{ title }}</h1>
+    <div class="header-actions">
+      <button type="button" class="btn btn-secondary" id="btn-preview">Preview PDF</button>
+      <button type="submit" class="btn btn-primary">Save</button>
+    </div>
+  </header>
+
+  <main>
+    <p class="panel-label">{{ label }}</p>
+    <textarea name="content_letter" id="letter-textarea" spellcheck="false" autocomplete="off">{{ content }}</textarea>
+  </main>
+
+</form>
+
+<!-- Preview modal -->
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal-toolbar">
+    <h2>A4 Preview</h2>
+    <div class="toolbar-actions">
+      <button class="btn btn-print" id="btn-print">Print / Save PDF</button>
+      <button class="btn btn-close" id="btn-close">Close</button>
+    </div>
+  </div>
+  <div class="a4-page">
+    <div class="letter-preview" id="letter-preview"></div>
+  </div>
+</div>
+
+<script>
+  const backdrop   = document.getElementById('modal-backdrop');
+  const preview    = document.getElementById('letter-preview');
+  const textarea   = document.getElementById('letter-textarea');
+
+  document.getElementById('btn-preview').addEventListener('click', () => {
+    preview.innerHTML = marked.parse(textarea.value);
+    backdrop.classList.add('open');
+  });
+
+  document.getElementById('btn-close').addEventListener('click', () => {
+    backdrop.classList.remove('open');
+  });
+
+  backdrop.addEventListener('click', e => {
+    if (e.target === backdrop) backdrop.classList.remove('open');
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') backdrop.classList.remove('open');
+  });
+
+  document.getElementById('btn-print').addEventListener('click', () => {
+    window.print();
+  });
+</script>
+
+</body>
+</html>

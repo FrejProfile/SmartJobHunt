@@ -1,0 +1,135 @@
+{% extends 'editor/base.html' %}
+{% block title %}Competences{% endblock %}
+
+{% block content %}
+<style>
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .btn {
+    padding: 0.4rem 0.9rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .btn-primary { background: #2563eb; color: #fff; }
+  .btn-primary:hover { background: #1d4ed8; }
+  .btn-ghost {
+    background: none;
+    color: #555;
+    border: 1px solid #ccc;
+  }
+  .btn-ghost:hover { background: #f0f0f0; color: #222; }
+
+  .tree {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .category-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .category-header {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: #f8f8f8;
+    border-bottom: 1px solid #eee;
+    gap: 0.75rem;
+    text-decoration: none;
+    color: inherit;
+  }
+  .category-header:hover { background: #f0f0f0; }
+
+  .category-header h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    flex: 1;
+  }
+
+  .category-header .chevron {
+    font-size: 0.75rem;
+    color: #aaa;
+  }
+
+  .sub-list {
+    padding: 0.5rem 1rem 0.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .sub-chip {
+    padding: 0.3rem 0.75rem;
+    background: #f0f4ff;
+    border: 1px solid #c7d7ff;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    color: #1e40af;
+    text-decoration: none;
+  }
+  .sub-chip:hover { background: #dbeafe; }
+
+  .sub-list .btn-ghost {
+    font-size: 0.78rem;
+    padding: 0.25rem 0.6rem;
+  }
+
+  .index-row {
+    margin-bottom: 1rem;
+  }
+</style>
+
+<div class="page-header">
+  <h2>Competences</h2>
+  <a class="btn btn-primary" href="{% url 'editor:new_competence' %}">+ New Category</a>
+</div>
+
+{% if has_index %}
+<div class="index-row">
+  <a class="btn btn-ghost" href="{% url 'editor:edit_index' %}">Edit Index</a>
+</div>
+{% endif %}
+
+<div class="tree">
+  {% for cat in tree %}
+  <div class="category-card">
+    <a class="category-header" href="{% url 'editor:edit_competence' category=cat.slug %}">
+      <h3>{{ cat.label }}</h3>
+      <span class="chevron">›</span>
+    </a>
+    <div class="sub-list">
+      {% for sub in cat.subs %}
+      <span class="sub-chip">{{ sub.label }}</span>
+      {% empty %}
+      <span style="color:#bbb;font-size:0.8rem;">No subcategories</span>
+      {% endfor %}
+    </div>
+  </div>
+  {% empty %}
+  <p style="color:#999;">No competences found. Create one to get started.</p>
+  {% endfor %}
+</div>
+{% endblock %}
