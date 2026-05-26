@@ -77,7 +77,10 @@ class Command(BaseCommand):
         session = requests.Session()
         session.headers.update({"User-Agent": "Mozilla/5.0"})
 
-        query = " ".join(search_words)
+        query = " ".join(
+            f'"{term}"' if ' ' in term else term
+            for term in search_words
+        )
         self.stdout.write(f"Query: '{query}'")
         self.stdout.write(f"Blacklist: {blacklist}")
 

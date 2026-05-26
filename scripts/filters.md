@@ -22,7 +22,7 @@
 - financial
 - chief
 - accountant
-- controller
+# controller
 - chef
 - student
 - økonom

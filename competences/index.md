@@ -12,7 +12,8 @@ hands-on lab work and Amfitech in-company project.
 
 ## Embedded Systems
 STM32, C/C++, PCB design, KiCad, EMC shielding, signal integrity, VHDL, Vivado,
-FPGA across three courses. Production testing at Swienty A/S.
+FPGA across three courses. Production testing at Swienty A/S. Driverdevelopment by reading the linux kernel
+ and testing drivers on rasperry pi 4.
 `competences/embedded_systems/summary.md`
 
 ## Software Engineering

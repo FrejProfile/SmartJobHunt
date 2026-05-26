@@ -121,6 +121,29 @@ def scrape_jobs(request):
     return StreamingHttpResponse(generate(), content_type='text/plain; charset=utf-8')
 
 
+# ── Check URLs ───────────────────────────────────────────────────────────────
+
+def check_urls(request):
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+
+    def generate():
+        proc = subprocess.Popen(
+            [sys.executable, '-u', 'manage.py', 'cleanup_jobs', '--check-only'],
+            cwd=_BASE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+        )
+        for line in iter(proc.stdout.readline, ''):
+            yield line
+        proc.wait()
+        yield f'__exit_code__:{proc.returncode}\n'
+
+    return StreamingHttpResponse(generate(), content_type='text/plain; charset=utf-8')
+
+
 # ── Table browser ────────────────────────────────────────────────────────────
 
 def table_browser(request):
@@ -196,4 +219,5 @@ def table_browser(request):
         'append_filters_url': reverse('jobs:active_filters'),
         'scrape_url': reverse('jobs:scrape_jobs'),
         'delete_url': reverse('jobs:delete_jobs'),
+        'check_urls_url': reverse('jobs:check_urls'),
     })

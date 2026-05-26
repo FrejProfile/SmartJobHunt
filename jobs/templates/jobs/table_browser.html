@@ -487,6 +487,25 @@
   </div>
 </div>
 
+<!-- Check URLs modal -->
+<div id="checkurls-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;">
+  <div style="background:#1a1a1a;border:1px solid #333;border-radius:8px;width:680px;max-width:95vw;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 16px 48px rgba(0,0,0,0.6);">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;border-bottom:1px solid #333;flex-shrink:0;">
+      <span style="font-size:0.875rem;font-weight:600;color:#e0e0e0;">Check URLs</span>
+      <span id="checkurls-status" style="font-size:0.78rem;color:#aaa;">Running…</span>
+    </div>
+    <pre id="checkurls-output" style="flex:1;overflow-y:auto;margin:0;padding:0.75rem 1rem;font-size:0.78rem;line-height:1.6;color:#a3e635;background:transparent;white-space:pre-wrap;word-break:break-all;min-height:200px;max-height:50vh;"></pre>
+    <!-- Confirmation panel shown after check completes and dead jobs found -->
+    <div id="checkurls-confirm" style="display:none;padding:0.75rem 1rem;border-top:1px solid #333;font-size:0.82rem;color:#e0e0e0;">
+      <div id="checkurls-dead-list" style="margin-bottom:0.6rem;"></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:0.5rem;padding:0.65rem 1rem;border-top:1px solid #333;flex-shrink:0;">
+      <button id="checkurls-delete-btn" style="display:none;padding:0.4rem 0.9rem;background:#dc2626;color:#fff;border:none;border-radius:4px;font-size:0.8rem;font-weight:600;cursor:pointer;">Delete Dead Jobs</button>
+      <button id="checkurls-close" style="padding:0.4rem 0.9rem;background:none;color:#aaa;border:1px solid #444;border-radius:4px;font-size:0.8rem;cursor:pointer;">Close</button>
+    </div>
+  </div>
+</div>
+
 <div id="snippet-tooltip"></div>
 <script id="filter-files-data" type="application/json">{{ filter_files_json|safe }}</script>
 {% csrf_token %}
@@ -955,6 +974,138 @@
     }
   }
 
+  // ── Check URLs ──
+  const checkurlsModal     = document.getElementById('checkurls-modal');
+  const checkurlsOutput    = document.getElementById('checkurls-output');
+  const checkurlsStatus    = document.getElementById('checkurls-status');
+  const checkurlsConfirm   = document.getElementById('checkurls-confirm');
+  const checkurlsDeadList  = document.getElementById('checkurls-dead-list');
+  const checkurlsDeleteBtn = document.getElementById('checkurls-delete-btn');
+
+  document.getElementById('checkurls-close').addEventListener('click', () => {
+    checkurlsModal.style.display = 'none';
+  });
+
+  async function runCheckUrls() {
+    checkurlsModal.style.display = 'flex';
+    checkurlsOutput.textContent = '';
+    checkurlsStatus.textContent = 'Running…';
+    checkurlsStatus.style.color = '#aaa';
+    checkurlsConfirm.style.display = 'none';
+    checkurlsDeleteBtn.style.display = 'none';
+    checkurlsDeadList.innerHTML = '';
+    // Remove any old delete listener
+    checkurlsDeleteBtn.replaceWith(checkurlsDeleteBtn.cloneNode(true));
+
+    const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    let resp;
+    try {
+      resp = await fetch('{{ check_urls_url }}', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrf },
+      });
+    } catch (e) {
+      checkurlsStatus.textContent = 'Connection error';
+      checkurlsStatus.style.color = '#f87171';
+      return;
+    }
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let deadJobs = null;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value, { stream: true });
+      for (const rawLine of chunk.split('\n')) {
+        const line = rawLine.trimEnd();
+        if (!line) continue;
+
+        if (line.startsWith('__exit_code__:')) {
+          const code = parseInt(line.split(':')[1]);
+          if (code !== 0) {
+            checkurlsStatus.textContent = `Failed (exit ${code})`;
+            checkurlsStatus.style.color = '#f87171';
+          }
+          continue;
+        }
+
+        if (line.startsWith('__dead_jobs__:')) {
+          try { deadJobs = JSON.parse(line.slice('__dead_jobs__:'.length)); } catch {}
+          continue;
+        }
+
+        let color = '#a3e635';
+        if (line.includes('✗')) color = '#f87171';
+        else if (line.includes('✓')) color = '#34d399';
+        else if (line.includes('?') || line.includes('Skipped')) color = '#fb923c';
+        else if (line.startsWith('──') || line.startsWith('Checking')) color = '#94a3b8';
+
+        const span = document.createElement('span');
+        span.style.color = color;
+        span.textContent = line + '\n';
+        checkurlsOutput.appendChild(span);
+        checkurlsOutput.scrollTop = checkurlsOutput.scrollHeight;
+      }
+    }
+
+    if (deadJobs !== null) {
+      if (deadJobs.length === 0) {
+        checkurlsStatus.textContent = 'Done — no dead jobs';
+        checkurlsStatus.style.color = '#34d399';
+      } else {
+        checkurlsStatus.textContent = `Done — ${deadJobs.length} dead job${deadJobs.length !== 1 ? 's' : ''}`;
+        checkurlsStatus.style.color = '#f87171';
+
+        // Build confirmation list
+        let html = `<strong style="color:#f87171">Delete ${deadJobs.length} dead job${deadJobs.length !== 1 ? 's' : ''}?</strong>`;
+        html += '<ul style="margin:0.5rem 0 0 1rem;line-height:1.8;color:#ccc;">';
+        deadJobs.forEach(j => {
+          html += `<li>${j.title} <span style="color:#888">— ${j.employer}</span></li>`;
+        });
+        html += '</ul>';
+        checkurlsDeadList.innerHTML = html;
+        checkurlsConfirm.style.display = 'block';
+
+        const freshBtn = document.getElementById('checkurls-delete-btn');
+        freshBtn.style.display = 'inline-block';
+        freshBtn.addEventListener('click', async () => {
+          freshBtn.disabled = true;
+          freshBtn.textContent = 'Deleting…';
+          const ids = deadJobs.map(j => j.id);
+          const csrfEl = document.querySelector('[name=csrfmiddlewaretoken]');
+          let delResp;
+          try {
+            delResp = await fetch('{{ delete_url }}', {
+              method: 'POST',
+              headers: { 'X-CSRFToken': csrfEl.value, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ ids, table: 'job' }),
+            });
+          } catch (e) {
+            showToast('Network error: ' + e.message, 'error');
+            freshBtn.disabled = false;
+            freshBtn.textContent = 'Delete Dead Jobs';
+            return;
+          }
+          const data = await delResp.json();
+          if (data.ok) {
+            checkurlsModal.style.display = 'none';
+            showToast(`Deleted ${data.deleted} dead job${data.deleted !== 1 ? 's' : ''}.`, 'ok');
+          } else {
+            showToast(data.error || 'Delete failed.', 'error');
+            freshBtn.disabled = false;
+            freshBtn.textContent = 'Delete Dead Jobs';
+          }
+        });
+      }
+    } else if (checkurlsStatus.textContent === 'Running…') {
+      checkurlsStatus.textContent = 'Done';
+      checkurlsStatus.style.color = '#aaa';
+    }
+  }
+
   // ── Tool action dispatch ──
   toolsMenu.querySelectorAll('.menu-item[data-action]').forEach(item => {
     item.addEventListener('click', () => {
@@ -964,6 +1115,8 @@
         runScrape();
       } else if (action === 'delete_selected') {
         deleteSelected();
+      } else if (action === 'check_urls') {
+        runCheckUrls();
       } else if (action === 'append_active_filters') {
         appendActiveFilters();
       } else {

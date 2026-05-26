@@ -7,6 +7,8 @@ coupling noise. This is design-side EMC knowledge, not accredited compliance tes
 
 Debugging experience with GDB on embedded targets, including JTAG/SWD interfaces.
 
+Linux driver development experience through tutorials on rasperry pi 4 and writing custom driver to interface a camera module using i2c, spi and the device-tree.
+
 VHDL and FPGA experience across three courses using Vivado:
 
 
@@ -30,3 +32,4 @@ Load for specific detail:
 - `competences/embedded_systems/pcb_design/summary.md`
 - `competences/embedded_systems/fpga_vhdl/summary.md`
 - `competences/embedded_systems/production_testing/summary.md`
+- `competences/embedded_systems/driver_development/summary.md`

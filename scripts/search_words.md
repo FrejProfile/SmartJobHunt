@@ -1,9 +1,11 @@
 - embedded
 - mekatronik
 - mechatronic
-# firmware
+- firmware
 # elektronik
 # electronic
-# fpga
-# control engineer
-# signal processing
+- fpga
+- control engineer
+- signal processing
+- ros2
+# vision
